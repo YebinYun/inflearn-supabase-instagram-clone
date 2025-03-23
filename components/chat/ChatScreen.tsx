@@ -1,25 +1,33 @@
 "use client";
 
-import { Button } from "@material-tailwind/react";
 import Person from "./Person";
 import Message from "./Message";
 import { useRecoilValue } from "recoil";
-import { selectedIndexState } from "utils/recoil/atoms";
-import { useEffect } from "react";
+import {
+  selectedUserIdState,
+  selectedUserIndexState,
+} from "utils/recoil/atoms";
+import { useQuery } from "@tanstack/react-query";
+import { getUserById } from "actions/chatActions";
 
 export default function ChatScreen() {
-  const selectedIndex = useRecoilValue(selectedIndexState);
+  const selectedUserId = useRecoilValue(selectedUserIdState);
+  const selectedUserIndex = useRecoilValue(selectedUserIndexState);
+  const selectedUserQuery = useQuery({
+    queryKey: ["user", selectedUserId],
+    queryFn: async () => getUserById(selectedUserId),
+  });
 
-  return selectedIndex !== null ? (
+  return selectedUserQuery.data !== null ? (
     <div className="w-full h-screen flex flex-col">
       {/* Active 유저 영역 */}
       <Person
-        index={selectedIndex}
+        index={selectedUserIndex}
         isActive={false}
-        name={"Lopun"}
+        name={selectedUserQuery.data?.email?.split("@")?.[0]}
         onChatScreen={true}
         onlineAt={new Date().toISOString()}
-        userId={"iasdonfiodasn"}
+        userId={selectedUserQuery.data?.id}
       />
 
       {/* 채팅 영역 */}
